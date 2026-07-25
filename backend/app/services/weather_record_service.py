@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 from app.config import Settings
 from app.schemas import ResolvedLocation,WeatherQuery,WeatherRecordCreate
@@ -6,7 +6,7 @@ from app.services.geocoding_service import search_locations
 from app.services.weather_service import fetch_weather
 from bson import ObjectId
 from app.exceptions import InvalidWeatherRecordIdError,WeatherRecordNotFoundError
-from app.schemas import WeatherRecordResponse
+from app.schemas import ResolvedLocation,WeatherQuery,WeatherRecordCreate,WeatherRecordResponse,WeatherRecordUpdate
 
 async def resolve_requested_location(request_data,settings,):
     if request_data.location is not None:
@@ -59,3 +59,50 @@ async def read_weather_record_by_id(collection,record_id,):
     if document is None:
         raise WeatherRecordNotFoundError(record_id)
     return serialize_weather_record(document)
+
+def build_complete_update_request(existing_document,update_data,):
+    provided_fields = update_data.model_dump(exclude_unset=True)
+    existing_location_query = existing_document.get("location_query")
+    existing_resolved_location = existing_document["resolved_location"]
+
+    location:str | None= None
+    latitude:float | None= None
+    longitude:float | None= None
+    location_was_updated =("location" in provided_fields and update_data.location is not None)
+    coordinates_were_updated = (update_data.latitude is not None and update_data.longitude is not None)
+
+    if location_was_updated:
+        location = update_data.location
+    elif coordinates_were_updated:
+        latitude = update_data.latitude
+        longitude = update_data.longitude
+    elif existing_location_query:
+        location = existing_location_query
+    else:
+        latitude = float(existing_resolved_location["latitude"])
+        longitude = float(existing_resolved_location["longitude"])
+
+    existing_start_date = date.fromisoformat(str(existing_document["start_date"]))
+    existing_end_date = date.fromisoformat(str(existing_document["end_date"]))
+    final_start_date = (update_data.start_date if update_data.start_date is not None else existing_start_date)
+    final_end_date = (update_data.end_date if update_data.end_date is not None else existing_end_date)
+    final_temperature_unit = (update_data.temperature_unit if update_data.temperature_unit is not None else existing_document["temperature_unit"])
+    return WeatherRecordCreate(location=location,latitude=latitude,longitude=longitude,start_date=final_start_date,end_date=final_end_date,temperature_unit=final_temperature_unit,)
+
+async def update_weather_record_by_id(collection,record_id,update_data,settings,):
+    if not ObjectId.is_valid(record_id):
+        raise InvalidWeatherRecordIdError(record_id)
+    object_id = ObjectId(record_id)
+    existing_document = await collection.find_one({"_id": object_id,})
+
+    if existing_document is None:
+        raise WeatherRecordNotFoundError(record_id)
+
+    complete_request = build_complete_update_request(existing_document=existing_document,update_data=update_data,)
+    refreshed_document = (await prepare_weather_record_document(request_data=complete_request,settings=settings,))
+    refreshed_document.pop("created_at", None)
+    await collection.update_one({"_id": object_id,},{"$set": refreshed_document,},)
+    updated_document = await collection.find_one({"_id": object_id,})
+    if updated_document is None:
+        raise WeatherRecordNotFoundError(record_id)
+    return serialize_weather_record(updated_document)

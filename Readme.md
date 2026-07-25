@@ -93,3 +93,12 @@ WeatherApp allows users to retrieve previously stored weather requests from Mong
 
 ```text
 GET /api/weather-records
+
+## Update Weather Records
+
+Users can update selected fields on an existing weather record.
+
+### Endpoint
+
+```text
+PATCH /api/weather-records/{record_id}

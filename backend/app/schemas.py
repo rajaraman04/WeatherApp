@@ -54,10 +54,10 @@ class WeatherRecordUpdate(BaseModel):
 
     @model_validator(mode="after")
     def validate_update_values(self):
-        values= [self.location,self.latitude,self.longitude,self.start_date,self.end_date,self.temperature_unit,]
-        if all(value is None for value in values):
+        supplied_values = self.model_dump(exclude_unset=True)
+        if not supplied_values:
             raise ValueError("Provide at least one field to update.")
-        has_location= bool(self.location)
+        has_location= ("location" in supplied_values and self.location is not None)
         has_latitude= self.latitude is not None
         has_longitude= self.longitude is not None
         if has_latitude!= has_longitude:
@@ -67,11 +67,11 @@ class WeatherRecordUpdate(BaseModel):
         if (self.start_date is not None and self.end_date is not None):
             if self.end_date < self.start_date:
                 raise ValueError("End date must be the same as or later than start date.")
-            number_of_days = (self.end_date - self.start_date).days + 1
-            if number_of_days > 5:
-                raise ValueError( "The selected date range cannot exceed five days.")
+            selected_days = (self.end_date - self.start_date).days + 1
+            if selected_days > 5:
+                raise ValueError("The selected date range cannot exceed five days.")
         return self
-
+    
 class LocationSearchResult(BaseModel):
     name:str
     state:str | None = None
