@@ -23,3 +23,13 @@ Create `backend/.env` using `backend/.env.example`:
 MONGODB_URI=<your MongoDB Atlas connection string>
 MONGODB_DATABASE=WeatherApp
 MONGODB_COLLECTION=Weather_records
+
+## MongoDB Application Integration
+
+FastAPI creates one asynchronous MongoDB client during application startup and closes it during application shutdown.
+
+The MongoDB resources are made available to API endpoints through FastAPI application state.
+
+The health endpoint verifies both the API and database connection:
+```text
+GET /api/health
