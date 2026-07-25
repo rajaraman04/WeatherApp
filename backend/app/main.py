@@ -3,6 +3,7 @@ from pymongo.errors import PyMongoError
 from fastapi.middleware.cors import CORSMiddleware
 from typing import AsyncIterator
 import logging
+from app.routes.locations import router as locations_router
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 from app.config import get_settings
@@ -34,6 +35,7 @@ app = FastAPI(title="Weather App",description=("A Weather app API for weather re
 allowed_origins = ["http://localhost:5173","http://127.0.0.1:5173",]
 
 app.add_middleware(CORSMiddleware,allow_origins=allowed_origins,allow_credentials=False,allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],allow_headers=["Content-Type", "Authorization"],)
+app.include_router(locations_router)
 
 @app.get("/", tags=["General"])
 async def root():
@@ -51,6 +53,3 @@ async def health_check(request:Request):
         logger.error("MongoDB health check failed: %s", error)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,detail="MongoDB is currently unavailable.",) from error
     return {"status": "healthy","service": "Weather App API","version": "1.0.0","database": "connected",}
-
-
-

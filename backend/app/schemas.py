@@ -67,9 +67,11 @@ class LocationSearchResult(BaseModel):
     name:str
     state:str | None = None
     country:str
+    country_code:str
     postal_code:str | None = None
     latitude:float
     longitude:float
+    timezone:str | None = None
 
 class ResolvedLocation(BaseModel):
     name:str

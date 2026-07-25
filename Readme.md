@@ -52,3 +52,17 @@ Validation rules include:
 - Unexpected fields are rejected
 
 Separate models are used for create requests, update requests,location results, weather data, forecast data, air quality, and API responses.
+
+## Location Search
+The application validates location input through the Open-Meteo Geocoding API.
+
+Supported inputs include:
+- City
+- Town
+- Region
+- Country
+- ZIP or postal code
+
+### Endpoint
+```text
+GET /api/locations/search?q=Binghamton&limit=5
