@@ -1,6 +1,6 @@
 import logging
 from typing import Annotated
-from fastapi import APIRouter,Depends,HTTPException,Request,status,Query
+from fastapi import APIRouter,Depends,HTTPException,Request,status,Query,Response
 from pymongo.errors import PyMongoError
 
 from app.config import Settings, get_settings
@@ -8,7 +8,7 @@ from app.exceptions import ExternalAPIError,LocationNotFoundError
 from app.schemas import ErrorResponse,WeatherRecordCreate,WeatherRecordResponse,WeatherRecordUpdate
 from app.services.weather_record_service import prepare_weather_record_document
 from app.exceptions import ExternalAPIError,InvalidWeatherRecordIdError,LocationNotFoundError,WeatherRecordNotFoundError
-from app.services.weather_record_service import prepare_weather_record_document,read_weather_record_by_id,read_weather_records,update_weather_record_by_id
+from app.services.weather_record_service import prepare_weather_record_document,read_weather_record_by_id,read_weather_records,update_weather_record_by_id,delete_weather_record_by_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/weather-records",tags=["Weather Records"],)
@@ -74,29 +74,44 @@ async def get_weather_record(record_id: str,request: Request,):
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,detail="The database is currently unavailable.",) from error
 
 @router.patch("/{record_id}", response_model=WeatherRecordResponse,
-    responses={400:{"model": ErrorResponse,"description": ("The MongoDB record ID is invalid."),},
-        404:{"model": ErrorResponse,"description": ("The record or requested location was not found."),},
-        502:{"model": ErrorResponse,"description": ("An external weather service failed."),},
-        503:{"model": ErrorResponse,"description": ("MongoDB is unavailable."),},},)
+    responses={400:{"model": ErrorResponse,"description": "The MongoDB record ID is invalid.",},
+        404:{"model": ErrorResponse,"description": "The record or requested location was not found.",},
+        502:{"model": ErrorResponse,"description": "An external weather service failed.",},
+        503:{"model": ErrorResponse,"description": "MongoDB is unavailable.",},},)
 
 async def update_weather_record(record_id: str,update_data: WeatherRecordUpdate,request: Request,settings: Annotated[Settings,Depends(get_settings),],):
     try:
         weather_collection = (request.app.state.weather_collection)
         return await update_weather_record_by_id(collection=weather_collection,record_id=record_id,update_data=update_data,settings=settings,)
-
     except InvalidWeatherRecordIdError as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=(f"'{error.record_id}' is not a valid weather record ID."),) from error
-
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"'{error.record_id}' is not a valid weather record ID.",) from error
     except WeatherRecordNotFoundError as error:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=(f"Weather record '{error.record_id}' was not found."),) from error
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Weather record '{error.record_id}' was not found.",) from error
     except LocationNotFoundError as error:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=(f"No matching location was found for '{error.query}'."),) from error
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"No matching location was found for '{error.query}'.",) from error
     except ExternalAPIError as error:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY,detail=str(error),) from error
-
     except (AttributeError, PyMongoError) as error:
         logger.error("Failed to update weather record: %s",error,)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,detail=("The database is currently unavailable."),) from error
-    
+
+@router.delete("/{record_id}",status_code=status.HTTP_204_NO_CONTENT,
+    responses={400:{"model": ErrorResponse,"description": "The MongoDB record ID is invalid.",},
+        404:{"model": ErrorResponse,"description": "The weather record was not found.",},
+        503:{"model": ErrorResponse,"description": "MongoDB is unavailable.",},},)
+
+async def delete_weather_record(record_id: str,request: Request,):
+    try:
+        weather_collection=request.app.state.weather_collection
+        await delete_weather_record_by_id(collection=weather_collection,record_id=record_id,)
+
+    except InvalidWeatherRecordIdError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"'{error.record_id}' is not a valid weather record ID.",) from error
+    except WeatherRecordNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Weather record '{error.record_id}' was not found.",) from error
+    except (AttributeError, PyMongoError) as error:
+        logger.error("Failed to delete weather record: %s",error,)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The database is currently unavailable.",) from error
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

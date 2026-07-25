@@ -106,3 +106,10 @@ async def update_weather_record_by_id(collection,record_id,update_data,settings,
     if updated_document is None:
         raise WeatherRecordNotFoundError(record_id)
     return serialize_weather_record(updated_document)
+
+async def delete_weather_record_by_id(collection,record_id,):
+    if not ObjectId.is_valid(record_id):
+        raise InvalidWeatherRecordIdError(record_id)
+    delete_result = await collection.delete_one({"_id": ObjectId(record_id),})
+    if delete_result.deleted_count == 0:
+        raise WeatherRecordNotFoundError(record_id)

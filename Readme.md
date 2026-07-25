@@ -102,3 +102,12 @@ Users can update selected fields on an existing weather record.
 
 ```text
 PATCH /api/weather-records/{record_id}
+
+## Delete Weather Records
+
+Users can permanently remove a stored weather record from MongoDB collections.
+
+### Endpoint
+
+```text
+DELETE /api/weather-records/{record_id}
