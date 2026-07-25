@@ -33,3 +33,22 @@ The MongoDB resources are made available to API endpoints through FastAPI applic
 The health endpoint verifies both the API and database connection:
 ```text
 GET /api/health
+
+## Request Validation
+
+WeatherApp API uses Pydantic models to validate API requests.
+
+Create requests support either:
+- A city, town, or postal-code location
+- A complete latitude and longitude pair
+
+Validation rules include:
+- Location must contain at least two characters
+- Latitude must be between -90 and 90
+- Longitude must be between -180 and 180
+- End date cannot be earlier than start date
+- Date range cannot exceed five days
+- Temperature unit must be Celsius or Fahrenheit
+- Unexpected fields are rejected
+
+Separate models are used for create requests, update requests,location results, weather data, forecast data, air quality, and API responses.
