@@ -84,3 +84,12 @@ WeatherApp can resolve a location, retrieve live weather data, and save the comp
 ### Endpoint
 ```text
 POST /api/weather-records
+
+## Read Weather Records
+
+WeatherApp allows users to retrieve previously stored weather requests from MongoDB.
+
+### Read All Records
+
+```text
+GET /api/weather-records

@@ -4,7 +4,9 @@ from app.config import Settings
 from app.schemas import ResolvedLocation,WeatherQuery,WeatherRecordCreate
 from app.services.geocoding_service import search_locations
 from app.services.weather_service import fetch_weather
-
+from bson import ObjectId
+from app.exceptions import InvalidWeatherRecordIdError,WeatherRecordNotFoundError
+from app.schemas import WeatherRecordResponse
 
 async def resolve_requested_location(request_data,settings,):
     if request_data.location is not None:
@@ -39,3 +41,21 @@ async def prepare_weather_record_document(request_data,settings,):
         "created_at":current_time,
         "updated_at":current_time,
     }
+
+def serialize_weather_record(document,) :
+    response_data = {**document,"id": str(document["_id"]),}
+    response_data.pop("_id", None)
+    return WeatherRecordResponse.model_validate(response_data)
+
+async def read_weather_records(collection,skip,limit,):
+    cursor = (collection.find({}).sort("created_at", -1).skip(skip).limit(limit))
+    documents = await cursor.to_list(length=limit)
+    return [serialize_weather_record(document) for document in documents]
+
+async def read_weather_record_by_id(collection,record_id,):
+    if not ObjectId.is_valid(record_id):
+        raise InvalidWeatherRecordIdError(record_id)
+    document = await collection.find_one({"_id": ObjectId(record_id),})
+    if document is None:
+        raise WeatherRecordNotFoundError(record_id)
+    return serialize_weather_record(document)
