@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field,ConfigDict,model_validator
 TemperatureUnit = Literal["celsius","fahrenheit"]
 WindSpeedUnit = Literal["kmh", "mph"]
 PrecipitationUnit = Literal["mm", "inch"]
+WeatherSource = Literal["forecast", "historical"]
 
 class WeatherRecordCreate(BaseModel):
     location:str | None = Field(default=None,min_length=2,max_length=120,examples=["Binghamton, NY"],)
@@ -34,6 +35,12 @@ class WeatherRecordCreate(BaseModel):
         number_of_days = (self.end_date - self.start_date).days + 1
         if number_of_days > 5:
             raise ValueError("The selected date range cannot exceed five days.")
+        today = date.today()
+        if self.start_date < today:
+            raise ValueError("Start date cannot be in the past.")
+        latest_supported_date = today + timedelta(days=15)
+        if self.end_date > latest_supported_date:
+            raise ValueError("End date cannot be more than 15 days from today.")
         return self
 
 class WeatherRecordUpdate(BaseModel):
@@ -119,13 +126,16 @@ class WeatherRecordResponse(BaseModel):
     resolved_location:ResolvedLocation
     start_date:date
     end_date:date
+    weather_source: WeatherSource
     temperature_unit:TemperatureUnit
+    wind_speed_unit:WindSpeedUnit
+    precipitation_unit:PrecipitationUnit
+    timezone:str
+    timezone_abbreviation:str | None = None
     current_weather:CurrentWeather
     forecast:list[ForecastDay]
-
     air_quality:AirQuality | None = None
     travel_insights:list[str] = Field(default_factory=list,)
-
     created_at:datetime
     updated_at:datetime
     model_config= ConfigDict(extra="ignore",)

@@ -76,3 +76,11 @@ Forecast API.
 
 ```text
 GET /api/weather
+
+## Create Weather Record
+
+WeatherApp can resolve a location, retrieve live weather data, and save the complete result in MongoDB.
+
+### Endpoint
+```text
+POST /api/weather-records
