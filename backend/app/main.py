@@ -8,6 +8,8 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 from app.config import get_settings
 from app.database import create_mongodb_client,verify_mongodb_connection
+from app.routes.locations import router as locations_router
+from app.routes.weather import router as weather_router
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ allowed_origins = ["http://localhost:5173","http://127.0.0.1:5173",]
 
 app.add_middleware(CORSMiddleware,allow_origins=allowed_origins,allow_credentials=False,allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],allow_headers=["Content-Type", "Authorization"],)
 app.include_router(locations_router)
-
+app.include_router(weather_router)
 @app.get("/", tags=["General"])
 async def root():
     return {

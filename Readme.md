@@ -66,3 +66,13 @@ Supported inputs include:
 ### Endpoint
 ```text
 GET /api/locations/search?q=Binghamton&limit=5
+
+## Weather Forecast Integration
+
+WeatherWise retrieves real weather data through the Open-Meteo
+Forecast API.
+
+### Endpoint
+
+```text
+GET /api/weather

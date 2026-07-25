@@ -1,8 +1,10 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Literal, Self
 from pydantic import BaseModel, Field,ConfigDict,model_validator
 
 TemperatureUnit = Literal["celsius","fahrenheit"]
+WindSpeedUnit = Literal["kmh", "mph"]
+PrecipitationUnit = Literal["mm", "inch"]
 
 class WeatherRecordCreate(BaseModel):
     location:str | None = Field(default=None,min_length=2,max_length=120,examples=["Binghamton, NY"],)
@@ -90,15 +92,20 @@ class CurrentWeather(BaseModel):
     weather_code:int | None = None
     condition:str
     observed_at:datetime | None = None
+    is_day: bool | None = None
 
 class ForecastDay(BaseModel):
     forecast_date:date
     minimum_temperature:float
     maximum_temperature:float
-    precipitation_probability:float | None = Field(default=None,ge=0,le=100,)
-    maximum_wind_speed:float | None = Field(default=None,ge=0,)
-    weather_code:int | None = None
+    precipitation_probability:float | None=Field(default=None,ge=0,le=100,)
+    precipitation_sum:float | None=Field(default=None,ge=0,)
+
+    maximum_wind_speed:float | None=Field(default=None,ge=0,)
+    weather_code:int | None=None
     condition:str
+    sunrise:datetime | None=None
+    sunset:datetime | None=None
 
 class AirQuality(BaseModel):
     us_aqi:float | None = Field(default=None,ge=0,)
@@ -123,6 +130,39 @@ class WeatherRecordResponse(BaseModel):
     updated_at:datetime
     model_config= ConfigDict(extra="ignore",)
 
+class WeatherQuery(BaseModel):
+    latitude:float=Field(ge=-90,le=90,examples=[42.0987],)
+    longitude:float=Field(ge=-180,le=180,examples=[-75.9180],)
+    start_date:date
+    end_date:date
+    temperature_unit:TemperatureUnit="fahrenheit"
+    model_config=ConfigDict(extra="forbid",)
+
+    @model_validator(mode="after")
+    def validate_forecast_dates(self):
+        if self.end_date < self.start_date:
+            raise ValueError("End date must be the same as or later than start date.")
+        selected_days=(self.end_date-self.start_date).days + 1
+        if selected_days > 5:
+            raise ValueError("The selected date range cannot exceed 5 days.")
+        today = date.today()
+        if self.start_date < today:
+            raise ValueError("Start date cannot be in past.")
+        latest_supported_date = today + timedelta(days=15)
+        if self.end_date > latest_supported_date:
+            raise ValueError("End date cannot be more than 15 days from today.")
+        return self
+
+class WeatherDataResponse(BaseModel):
+    latitude:float
+    longitude:float
+    timezone:str
+    timezone_abbreviation:str | None = None
+    temperature_unit:TemperatureUnit
+    wind_speed_unit:WindSpeedUnit
+    precipitation_unit:PrecipitationUnit
+    current_weather:CurrentWeather
+    forecast:list[ForecastDay]
 
 class ErrorResponse(BaseModel):
     detail:str
