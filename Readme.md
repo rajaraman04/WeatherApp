@@ -120,3 +120,43 @@ WeatherApp supports exporting MongoDB weather records stored in JSON and CSV for
 
 ```text
 GET /api/weather-records/export/json
+
+## Frontend Structure
+
+The WeatherApp frontend is built with React and Vite.
+
+### Pages
+It comprises of following pages
+- Dashboard
+- Saved Weather Records
+- About
+- Not Found
+
+### Dashboard Layout
+
+The dashboard currently includes:
+- Location and date-range form
+- Temperature-unit selector
+- Current-location button
+- Current-weather placeholder
+- Travel-insight placeholder
+- Five-day forecast placeholder
+
+The frontend uses React Router for client-side navigation.
+
+### Responsive Design
+
+The application follows a desktop-first responsive approach using:
+- CSS Grid
+- Flexbox
+- Flexible container widths
+- Responsive font sizing
+- Tablet and mobile media queries
+- Stacked form and card layouts
+
+### Run the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev

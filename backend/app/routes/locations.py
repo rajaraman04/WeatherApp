@@ -16,9 +16,9 @@ router = APIRouter(prefix="/api/locations",tags=["Locations"],)
 
 async def search_location(q: Annotated[str,Query(min_length=2,max_length=120,
     description=("City, town, state, country, or postal code to search for."),
-    examples=["Binghamton, NY"],),],
-    settings: Annotated[Settings,Depends(get_settings),],
+    examples=["Binghamton, NY"],),],settings: Annotated[Settings,Depends(get_settings),],
     limit: Annotated[int,Query(ge=1,le=10,description="Maximum number of results.",),] = 5,):
+
     normalized_query = q.strip()
     if len(normalized_query) < 2:
         raise HTTPException(
