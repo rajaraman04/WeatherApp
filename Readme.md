@@ -194,3 +194,25 @@ The application handles:
 - FastAPI connection failure
 
 Browser geolocation requires user permission. The deployed frontend must use HTTPS. Local development can use `localhost`.
+
+## Five-Day Forecast
+
+WeatherApp displays real daily forecast information returned by FastAPI.
+
+Each forecast card includes:
+- Day and date
+- Weather condition
+- Weather icon
+- Maximum temperature
+- Minimum temperature
+- Precipitation probability
+- Precipitation amount
+- Maximum wind speed
+- Sunrise
+- Sunset
+
+The forecast automatically uses the units returned by the backend:
+- Fahrenheit, mph, and inches
+- Celsius, km/h, and millimeters
+
+The dashboard supports date ranges from one to five days. The number of displayed cards matches the selected range and the forecast data returned by the weather API.

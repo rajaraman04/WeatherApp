@@ -30,3 +30,14 @@ export function getWeatherIcon(weatherCode) {
   }
   return "🌡️";
 }
+
+export function formatWeatherNumber(value,maximumFractionDigits = 1,) {
+  if (value === null ||value === undefined ||Number.isNaN(Number(value))) {
+    return "Not available";
+  }
+  return new Intl.NumberFormat("en-US", {maximumFractionDigits,}).format(Number(value));
+}
+
+export function getPrecipitationUnitLabel(unit) {
+  return unit === "inch" ? "in" : "mm";
+}

@@ -1,13 +1,12 @@
 import { useState } from "react";
 
+import ForecastSection from "../components/ForecastSection.jsx";
 import CurrentWeatherCard from "../components/CurrentWeatherCard.jsx";
 import LocationResults from "../components/LocationResults.jsx";
 import LocationSearchForm from "../components/LocationSearchForm.jsx";
 import {getWeather,searchLocations,} from "../services/api.js";
 import { getApiErrorMessage } from "../utils/apiError.js";
 import { getCurrentCoordinates } from "../utils/geolocation.js";
-
-const forecastPlaceholders = ["Day 1","Day 2","Day 3","Day 4","Day 5",];
 
 function Dashboard() {
   const [locationResults, setLocationResults] =useState([]);
@@ -159,35 +158,7 @@ async function handleCurrentLocation(criteria) {
           </ul>
         </article>
       </section>
-
-      <section className="content-card forecast-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">
-              Upcoming conditions
-            </p>
-
-            <h2>Five-day forecast</h2>
-          </div>
-
-          <p className="section-heading__description">
-            The forecast response is now available in React state. Its complete display will be implemented soon.
-          </p>
-        </div>
-
-        <div className="forecast-grid">
-          {forecastPlaceholders.map((day) => (
-            <article className="forecast-card" key={day}>
-              <strong>{day}</strong>
-              <span className="forecast-card__icon" aria-hidden="true">
-                ◌
-              </span>
-              <span>High: --°</span>
-              <span>Low: --°</span>
-            </article>
-          ))}
-        </div>
-      </section>
+      <ForecastSection weatherData={weatherData} />
     </>
   );
 }
