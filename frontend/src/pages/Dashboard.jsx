@@ -5,7 +5,8 @@ import CurrentWeatherCard from "../components/CurrentWeatherCard.jsx";
 import LocationResults from "../components/LocationResults.jsx";
 import LocationSearchForm from "../components/LocationSearchForm.jsx";
 import SaveWeatherPanel from "../components/SaveWeatherPanel.jsx";
-import {createWeatherRecord, getWeather,searchLocations,} from "../services/api.js";
+import TravelExtras from "../components/TravelExtras.jsx";
+import {createWeatherRecord, getAirQuality,getWeather,searchLocations,} from "../services/api.js";
 import { getApiErrorMessage } from "../utils/apiError.js";
 import { getCurrentCoordinates } from "../utils/geolocation.js";
 
@@ -21,7 +22,7 @@ function Dashboard() {
   const [isSaving, setIsSaving] =useState(false);
   const [savedRecordId, setSavedRecordId] =useState(null);
   const [saveMessage, setSaveMessage] =useState("");
-  
+  const [airQuality, setAirQuality] =useState(null);  
   function resetSaveState() {
   setIsSaving(false);
   setSavedRecordId(null);
@@ -35,6 +36,7 @@ function Dashboard() {
     setSelectedLocation(null);
     setWeatherData(null);
     resetSaveState();
+    setAirQuality(null);
     try {
       const results = await searchLocations(criteria.location,);
       setSearchCriteria(criteria);
@@ -50,14 +52,17 @@ function Dashboard() {
     if (!searchCriteria) {
       return;
     }
-
     setIsLoadingWeather(true);
     setErrorMessage("");
+    setAirQuality(null);
     resetSaveState();
     try {
-      const result = await getWeather({latitude: location.latitude,longitude: location.longitude,startDate: searchCriteria.startDate,endDate: searchCriteria.endDate,temperatureUnit:searchCriteria.temperatureUnit,});
+      const weatherRequest = getWeather({latitude: location.latitude,longitude: location.longitude,startDate: searchCriteria.startDate,endDate: searchCriteria.endDate,temperatureUnit:searchCriteria.temperatureUnit,});
+      const airQualityRequest = getAirQuality({latitude: location.latitude,longitude: location.longitude,}).catch(() => null);
+      const [weatherResult,airQualityResult,] = await Promise.all([weatherRequest,airQualityRequest,]);
       setSelectedLocation(location);
-      setWeatherData(result);
+      setWeatherData(weatherResult);
+      setAirQuality(airQualityResult);
       setLocationResults([]);
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error),);
@@ -65,6 +70,7 @@ function Dashboard() {
       setIsLoadingWeather(false);
     }
   }
+
 async function handleCurrentLocation(criteria) {
   setIsLocating(true);
   setErrorMessage("");
@@ -72,15 +78,18 @@ async function handleCurrentLocation(criteria) {
   setSelectedLocation(null);
   setWeatherData(null);
   resetSaveState();
+  setAirQuality(null);
   try {
     const coordinates = await getCurrentCoordinates();
-    const result = await getWeather({latitude: coordinates.latitude,longitude: coordinates.longitude, startDate: criteria.startDate, endDate: criteria.endDate, temperatureUnit:criteria.temperatureUnit,});
+    const weatherRequest = getWeather({latitude: coordinates.latitude,longitude: coordinates.longitude,startDate: criteria.startDate,endDate: criteria.endDate,temperatureUnit:criteria.temperatureUnit,});
+    const airQualityRequest = getAirQuality({latitude: coordinates.latitude,longitude: coordinates.longitude,}).catch(() => null);
 
+    const [weatherResult,airQualityResult,]=await Promise.all([weatherRequest,airQualityRequest,]);
     setSearchCriteria({location: null,...criteria,});
-
     setSelectedLocation({name: "Current location",state: null,country: null,postal_code: null,latitude: coordinates.latitude,longitude: coordinates.longitude,accuracy: coordinates.accuracy,isCurrentLocation: true,});
 
-    setWeatherData(result);
+    setWeatherData(weatherResult);
+    setAirQuality(airQualityResult)
   } catch (error) {
     if (error.name === "BrowserGeolocationError") {
       setErrorMessage(error.message);
@@ -173,47 +182,27 @@ async function handleSaveWeather() {
 
       <LocationResults isLoadingWeather={isLoadingWeather}  locations={locationResults} onSelect={handleLocationSelection}/>
 
-      <section className="dashboard-grid">
-        {weatherData && selectedLocation ? (
-          <CurrentWeatherCard location={selectedLocation} weatherData={weatherData}/>) : (
+      {weatherData && selectedLocation ? (
+        <section className="weather-overview-grid" aria-label="Weather overview">
+          <CurrentWeatherCard location={selectedLocation} weatherData={weatherData}/>
+          <TravelExtras airQuality={airQuality} location={selectedLocation} weatherData={weatherData}/>
+          <SaveWeatherPanel isSaving={isSaving} onSave={handleSaveWeather} savedRecordId={savedRecordId} saveMessage={saveMessage}/>
+        </section>
+      ) : (
+        <section className="weather-overview-grid">
           <article className="content-card current-weather-card">
-            <p className="eyebrow">
-              Current conditions
-            </p>
-
+            <p className="eyebrow">Current conditions</p>
             <h2>No weather selected</h2>
-
             <p className="muted-text">
-              Search for a location to view temperature, humidity, wind speed, precipitation, and current conditions.
+              Search for a location to view temperature,humidity, wind speed, precipitation, and current conditions.
             </p>
-
             <div className="weather-placeholder">
               <span aria-hidden="true">☁</span>
               <strong>--°</strong>
             </div>
           </article>
-        )}
-
-        <article className="content-card">
-          <p className="eyebrow">Travel guidance</p>
-          <h2>Smart travel insights</h2>
-
-          <p className="muted-text">
-            Weather-based recommendations for rain, UV exposure, air quality, wind, heat, and cold will appear here.
-          </p>
-
-          <ul className="insight-list">
-            <li>Umbrella recommendation</li>
-            <li>Clothing guidance</li>
-            <li>Outdoor-activity suitability</li>
-          </ul>
-        </article>
-      </section>
-
-      {weatherData && selectedLocation && (
-      <SaveWeatherPanel isSaving={isSaving} onSave={handleSaveWeather} savedRecordId={savedRecordId} saveMessage={saveMessage} />
+        </section>
       )}
-
       <ForecastSection weatherData={weatherData} />
     </>
   );

@@ -175,5 +175,13 @@ class WeatherDataResponse(BaseModel):
     current_weather:CurrentWeather
     forecast:list[ForecastDay]
 
+class AirQualityResponse(BaseModel):
+    observed_at:datetime | None= None
+    us_aqi:float | None= None
+    category:str
+    pm2_5:float | None= None
+    pm10:float | None= None
+    uv_index:float | None= None
+
 class ErrorResponse(BaseModel):
     detail:str

@@ -1,20 +1,25 @@
-from datetime import date
+from datetime import date,timedelta
 import pytest
 from pydantic import ValidationError
 from app.schemas import WeatherRecordCreate,WeatherRecordUpdate
 
 def test_create_schema_accepts_location():
-    record = WeatherRecordCreate(location="Binghamton, NY",start_date=date(2026, 7, 25),end_date=date(2026, 7, 29),temperature_unit="fahrenheit",)
-    assert record.location=="Binghamton, NY"
-    assert record.latitude is None
-    assert record.longitude is None
-    assert record.temperature_unit=="fahrenheit"
+    today = date.today()
+    end_date = today + timedelta(days=4)
+    record = WeatherRecordCreate(location="Binghamton, NY",start_date=today,end_date=end_date,temperature_unit="fahrenheit",)
+    assert record.location == "Binghamton, NY"
+    assert record.start_date == today
+    assert record.end_date == end_date
+    assert record.temperature_unit == "fahrenheit"
 
 def test_create_schema_accepts_coordinates():
-    record = WeatherRecordCreate(latitude=42.0987,longitude=-75.9180,start_date=date(2026, 7, 25),end_date=date(2026, 7, 29),)
-    assert record.location is None
-    assert record.latitude == 42.0987
-    assert record.longitude == -75.9180
+    today=date.today()
+    end_date=today + timedelta(days=4)
+    record=WeatherRecordCreate(latitude=42.0987,longitude=-75.9180,start_date=today,end_date=end_date,)
+    assert record.latitude==42.0987
+    assert record.longitude==-75.9180
+    assert record.start_date==today
+    assert record.end_date==end_date
 
 def test_create_schema_rejects_missing_location():
     with pytest.raises(ValidationError,match="Provide a location or both latitude and longitude",):

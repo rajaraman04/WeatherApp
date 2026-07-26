@@ -59,4 +59,9 @@ export async function downloadWeatherRecords(exportFormat,) {
   downloadLink.remove();
   window.setTimeout(() => {URL.revokeObjectURL(downloadUrl);}, 0);
 }
+export async function getAirQuality({latitude,longitude,}) {
+  const response = await apiClient.get("/api/air-quality",{params:{latitude,longitude,},},);
+  return response.data;
+}
+
 export default apiClient;

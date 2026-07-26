@@ -2,15 +2,10 @@ import { Link } from "react-router";
 
 function SaveWeatherPanel({isSaving,onSave,savedRecordId,saveMessage,}) {
   return (
-    <section className="save-weather-panel" aria-labelledby="save-weather-title">
+    <article className="content-card save-weather-panel">
       <div>
-        <p className="eyebrow">
-          MongoDB Connection
-        </p>
-
-        <h2 id="save-weather-title">
-          Save this weather search
-        </h2>
+        <p className="eyebrow">MongoDB Connection</p>
+        <h2 id="save-weather-title">Save this weather search</h2>
 
         <p className="muted-text">
           Store the location, selected date range, current conditions, and daily forecast.
@@ -32,7 +27,7 @@ function SaveWeatherPanel({isSaving,onSave,savedRecordId,saveMessage,}) {
           {saveMessage}
         </p>
       )}
-    </section>
+    </article>
   );
 }
 export default SaveWeatherPanel;
