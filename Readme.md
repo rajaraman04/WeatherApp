@@ -111,3 +111,12 @@ Users can permanently remove a stored weather record from MongoDB collections.
 
 ```text
 DELETE /api/weather-records/{record_id}
+
+## Data Export
+
+WeatherApp supports exporting MongoDB weather records stored in JSON and CSV formats.
+
+### JSON Export
+
+```text
+GET /api/weather-records/export/json

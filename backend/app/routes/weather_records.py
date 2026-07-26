@@ -5,10 +5,11 @@ from pymongo.errors import PyMongoError
 
 from app.config import Settings, get_settings
 from app.exceptions import ExternalAPIError,LocationNotFoundError
-from app.schemas import ErrorResponse,WeatherRecordCreate,WeatherRecordResponse,WeatherRecordUpdate
+from app.schemas import ErrorResponse,WeatherRecordCreate,WeatherRecordResponse,WeatherRecordUpdate,ExportFormat
 from app.services.weather_record_service import prepare_weather_record_document
 from app.exceptions import ExternalAPIError,InvalidWeatherRecordIdError,LocationNotFoundError,WeatherRecordNotFoundError
 from app.services.weather_record_service import prepare_weather_record_document,read_weather_record_by_id,read_weather_records,update_weather_record_by_id,delete_weather_record_by_id
+from app.services.export_service import build_csv_export,build_json_export,create_export_filename,read_export_documents
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/weather-records",tags=["Weather Records"],)
@@ -104,7 +105,6 @@ async def delete_weather_record(record_id: str,request: Request,):
     try:
         weather_collection=request.app.state.weather_collection
         await delete_weather_record_by_id(collection=weather_collection,record_id=record_id,)
-
     except InvalidWeatherRecordIdError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"'{error.record_id}' is not a valid weather record ID.",) from error
     except WeatherRecordNotFoundError as error:
@@ -115,3 +115,24 @@ async def delete_weather_record(record_id: str,request: Request,):
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The database is currently unavailable.",) from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/export/{export_format}",response_class=Response,
+    responses={200:{"description": "Weather records export file.","content": {"application/json": {},"text/csv": {},},},
+        503:{"model": ErrorResponse,"description": "MongoDB is unavailable.",},},)
+
+async def export_weather_records(export_format: ExportFormat,request: Request,):
+    try:
+        weather_collection = request.app.state.weather_collection
+        documents = await read_export_documents(collection=weather_collection)
+    except (AttributeError, PyMongoError) as error:
+        logger.error("Failed to export weather records: %s",error,)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,detail="The database is currently unavailable.",) from error
+
+    if export_format=="json":
+        content=build_json_export(documents)
+        media_type = "application/json"
+    else:
+        content=build_csv_export(documents)
+        media_type = "text/csv"
+    filename = create_export_filename(export_format)
+    return Response(content=content,media_type=media_type,headers={"Content-Disposition": f'attachment; filename="{filename}"'},)

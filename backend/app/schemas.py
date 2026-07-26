@@ -6,6 +6,7 @@ TemperatureUnit = Literal["celsius","fahrenheit"]
 WindSpeedUnit = Literal["kmh", "mph"]
 PrecipitationUnit = Literal["mm", "inch"]
 WeatherSource = Literal["forecast", "historical"]
+ExportFormat = Literal["json", "csv"]
 
 class WeatherRecordCreate(BaseModel):
     location:str | None = Field(default=None,min_length=2,max_length=120,examples=["Binghamton, NY"],)
