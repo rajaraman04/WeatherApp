@@ -5,6 +5,7 @@ import LocationResults from "../components/LocationResults.jsx";
 import LocationSearchForm from "../components/LocationSearchForm.jsx";
 import {getWeather,searchLocations,} from "../services/api.js";
 import { getApiErrorMessage } from "../utils/apiError.js";
+import { getCurrentCoordinates } from "../utils/geolocation.js";
 
 const forecastPlaceholders = ["Day 1","Day 2","Day 3","Day 4","Day 5",];
 
@@ -15,6 +16,7 @@ function Dashboard() {
   const [weatherData, setWeatherData] =useState(null);
   const [isSearching, setIsSearching] =useState(false);
   const [isLoadingWeather, setIsLoadingWeather] =useState(false);
+  const [isLocating, setIsLocating] =useState(false);
   const [errorMessage, setErrorMessage] =useState("");
   async function handleLocationSearch(criteria) {
     setIsSearching(true);
@@ -51,7 +53,32 @@ function Dashboard() {
       setIsLoadingWeather(false);
     }
   }
+async function handleCurrentLocation(criteria) {
+  setIsLocating(true);
+  setErrorMessage("");
+  setLocationResults([]);
+  setSelectedLocation(null);
+  setWeatherData(null);
 
+  try {
+    const coordinates = await getCurrentCoordinates();
+    const result = await getWeather({latitude: coordinates.latitude,longitude: coordinates.longitude, startDate: criteria.startDate, endDate: criteria.endDate, temperatureUnit:criteria.temperatureUnit,});
+
+    setSearchCriteria({location: null,...criteria,});
+
+    setSelectedLocation({name: "Current location",state: null,country: null,postal_code: null,latitude: coordinates.latitude,longitude: coordinates.longitude,accuracy: coordinates.accuracy,isCurrentLocation: true,});
+
+    setWeatherData(result);
+  } catch (error) {
+    if (error.name === "BrowserGeolocationError") {
+      setErrorMessage(error.message);
+    } else {
+      setErrorMessage(getApiErrorMessage(error),);
+    }
+  } finally {
+    setIsLocating(false);
+  }
+}
   return (
     <>
       <section className="hero">
@@ -88,8 +115,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <LocationSearchForm isSearching={isSearching} onSearch={handleLocationSearch}/>
-
+    <LocationSearchForm isLocating={isLocating} isSearching={isSearching} onSearch={handleLocationSearch} onUseCurrentLocation={handleCurrentLocation}/>
       {errorMessage && ( <div className="error-alert" role="alert">
           {errorMessage}
         </div>

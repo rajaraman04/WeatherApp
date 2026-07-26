@@ -684,3 +684,13 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+.current-location-label {
+  display: inline-flex;
+  margin: 0.4rem 0 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.6rem;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

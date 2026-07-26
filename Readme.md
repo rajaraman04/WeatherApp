@@ -171,3 +171,26 @@ Create `frontend/.env`:
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000
+
+## Current Location
+
+WeatherApp supports retrieving weather from the user's current browser location.
+
+### Workflow
+1. User clicks **Use Current Location**
+2. The browser requests location permission
+3. Latitude and longitude are returned to React
+4. React sends the coordinates to `GET /api/weather`
+5. FastAPI retrieves the weather information
+6. The dashboard displays the current conditions
+
+### Permission Handling
+
+The application handles:
+- Location permission denied
+- Position unavailable
+- Location timeout
+- Unsupported browser
+- FastAPI connection failure
+
+Browser geolocation requires user permission. The deployed frontend must use HTTPS. Local development can use `localhost`.

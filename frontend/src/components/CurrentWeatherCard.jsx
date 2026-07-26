@@ -31,6 +31,11 @@ function CurrentWeatherCard({location,weatherData,}) {
           <p className="muted-text">
             {currentWeather.condition}
           </p>
+          {location.isCurrentLocation && (
+            <p className="current-location-label">
+                Detected using browser location
+            </p>
+            )}
         </div>
 
         <span className="current-weather__icon" aria-hidden="true">
