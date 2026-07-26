@@ -37,7 +37,7 @@ app = FastAPI(title="Weather App",description=("A Weather app API for weather re
 
 allowed_origins = ["http://localhost:5173","http://127.0.0.1:5173",]
 
-app.add_middleware(CORSMiddleware,allow_origins=allowed_origins,allow_credentials=False,allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],allow_headers=["Content-Type", "Authorization"],)
+app.add_middleware(CORSMiddleware,allow_origins=allowed_origins,allow_credentials=False,allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],allow_headers=["Accept","Content-Type", "Authorization"],expose_headers=["Content-Disposition"])
 app.include_router(locations_router)
 app.include_router(weather_router)
 app.include_router(weather_records_router)

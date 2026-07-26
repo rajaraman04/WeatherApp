@@ -1005,3 +1005,123 @@ button:disabled {
     gap: 0.35rem;
   }
 }
+.button--danger {
+  border-color: #fecdca;
+  background: #ffffff;
+  color: #b42318;
+}
+
+.button--danger:hover:not(:disabled) {
+  border-color: #f97066;
+  background: #fef3f2;
+}
+
+.saved-record-card__actions {
+  display: flex;
+  margin-bottom: 1rem;
+  gap: 0.65rem;
+}
+
+.saved-record-card__actions .button {
+  flex: 1;
+}
+
+.modal-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  overflow-y: auto;
+  padding: 1.5rem;
+  place-items: center;
+  background: rgba(16, 24, 40, 0.62);
+}
+
+.edit-modal {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: #ffffff;
+  box-shadow:
+    0 24px 60px rgba(16, 24, 40, 0.24);
+}
+
+.edit-modal__header {
+  display: flex;
+  margin-bottom: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.edit-modal__header h2 {
+  margin-bottom: 0;
+}
+
+.modal-close-button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  place-items: center;
+  background: #ffffff;
+  color: #475467;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.modal-close-button:hover:not(:disabled) {
+  background: #f2f4f7;
+}
+
+.edit-record-form {
+  display: grid;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+.edit-record-form__dates {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-help-text {
+  color: #667085;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.edit-modal__actions {
+  display: flex;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 680px) {
+  .saved-record-card__actions {
+    flex-direction: column;
+  }
+
+  .edit-record-form__dates {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .edit-modal__actions .button {
+    width: 100%;
+  }
+
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+}

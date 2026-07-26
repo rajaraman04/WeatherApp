@@ -235,3 +235,19 @@ The Saved Records page calls:
 
 ```text
 GET /api/weather-records
+
+## Frontend CRUD Operations
+
+The Saved Records page supports complete MongoDB CRUD operations.
+
+### Update
+Users can edit:
+- Location
+- Start date
+- End date
+- Temperature unit
+
+Updating a record retrieves fresh weather data before updating MongoDB.
+
+```text
+PATCH /api/weather-records/{record_id}

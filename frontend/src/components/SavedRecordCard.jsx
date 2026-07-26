@@ -33,7 +33,7 @@ function formatCreatedAt(timestamp) {
   return new Intl.DateTimeFormat("en-US", {dateStyle: "medium",timeStyle: "short",}).format(date);
 }
 
-function SavedRecordCard({ record }) {
+function SavedRecordCard({isDeleting,onDelete,onEdit,record,}) {
   const currentWeather =record.current_weather;
   const temperatureSymbol =getTemperatureSymbol(record.temperature_unit,);
   const startDate= formatForecastDate(record.start_date,);
@@ -86,6 +86,15 @@ function SavedRecordCard({ record }) {
           </strong>
         </div>
       </div>
+        <div className="saved-record-card__actions">
+        <button className="button button--secondary" disabled={isDeleting} onClick={() => onEdit(record)} type="button">
+            Edit
+        </button>
+
+        <button className="button button--danger" disabled={isDeleting} onClick={() => onDelete(record)} type="button">
+            {isDeleting ? "Deleting..." : "Delete"}
+        </button>
+        </div>
 
       <div className="saved-record-card__footer">
         <span>
