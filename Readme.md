@@ -216,3 +216,22 @@ The forecast automatically uses the units returned by the backend:
 - Celsius, km/h, and millimeters
 
 The dashboard supports date ranges from one to five days. The number of displayed cards matches the selected range and the forecast data returned by the weather API.
+
+## Saving Weather Searches
+After previewing weather information, users can save a search to MongoDB.
+
+### Save Workflow
+1. Search for a location or use browser coordinates
+2. Retrieve current weather and daily forecast
+3. Select **Save Weather Search**
+4. React calls `POST /api/weather-records`
+5. FastAPI validates the request
+6. Fresh weather information is retrieved
+7. The complete record is stored in MongoDB
+
+### Saved Records
+
+The Saved Records page calls:
+
+```text
+GET /api/weather-records

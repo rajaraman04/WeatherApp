@@ -4,7 +4,8 @@ import ForecastSection from "../components/ForecastSection.jsx";
 import CurrentWeatherCard from "../components/CurrentWeatherCard.jsx";
 import LocationResults from "../components/LocationResults.jsx";
 import LocationSearchForm from "../components/LocationSearchForm.jsx";
-import {getWeather,searchLocations,} from "../services/api.js";
+import SaveWeatherPanel from "../components/SaveWeatherPanel.jsx";
+import {createWeatherRecord, getWeather,searchLocations,} from "../services/api.js";
 import { getApiErrorMessage } from "../utils/apiError.js";
 import { getCurrentCoordinates } from "../utils/geolocation.js";
 
@@ -17,12 +18,23 @@ function Dashboard() {
   const [isLoadingWeather, setIsLoadingWeather] =useState(false);
   const [isLocating, setIsLocating] =useState(false);
   const [errorMessage, setErrorMessage] =useState("");
+  const [isSaving, setIsSaving] =useState(false);
+  const [savedRecordId, setSavedRecordId] =useState(null);
+  const [saveMessage, setSaveMessage] =useState("");
+  
+  function resetSaveState() {
+  setIsSaving(false);
+  setSavedRecordId(null);
+  setSaveMessage("");
+}
+
   async function handleLocationSearch(criteria) {
     setIsSearching(true);
     setErrorMessage("");
     setLocationResults([]);
     setSelectedLocation(null);
     setWeatherData(null);
+    resetSaveState();
     try {
       const results = await searchLocations(criteria.location,);
       setSearchCriteria(criteria);
@@ -41,6 +53,7 @@ function Dashboard() {
 
     setIsLoadingWeather(true);
     setErrorMessage("");
+    resetSaveState();
     try {
       const result = await getWeather({latitude: location.latitude,longitude: location.longitude,startDate: searchCriteria.startDate,endDate: searchCriteria.endDate,temperatureUnit:searchCriteria.temperatureUnit,});
       setSelectedLocation(location);
@@ -58,7 +71,7 @@ async function handleCurrentLocation(criteria) {
   setLocationResults([]);
   setSelectedLocation(null);
   setWeatherData(null);
-
+  resetSaveState();
   try {
     const coordinates = await getCurrentCoordinates();
     const result = await getWeather({latitude: coordinates.latitude,longitude: coordinates.longitude, startDate: criteria.startDate, endDate: criteria.endDate, temperatureUnit:criteria.temperatureUnit,});
@@ -78,6 +91,44 @@ async function handleCurrentLocation(criteria) {
     setIsLocating(false);
   }
 }
+
+function buildWeatherRecordRequest() {
+  if (!searchCriteria ||!selectedLocation ||!weatherData) {
+    return null;
+  }
+
+  const requestData = {start_date: searchCriteria.startDate,end_date: searchCriteria.endDate,temperature_unit:searchCriteria.temperatureUnit,};
+
+  if (selectedLocation.isCurrentLocation) {
+    return {...requestData,latitude: selectedLocation.latitude,longitude: selectedLocation.longitude,};
+  }
+
+  return {...requestData,location: searchCriteria.location,};
+}
+
+async function handleSaveWeather() {
+  const requestData =buildWeatherRecordRequest();
+  if (!requestData) {
+    setSaveMessage("Search for weather before saving a record.",);
+    return;
+  }
+
+  setIsSaving(true);
+  setSaveMessage("");
+
+  try {
+    const savedRecord =await createWeatherRecord(requestData);
+    setSavedRecordId(savedRecord.id);
+
+    setSaveMessage("Weather search saved successfully.",);
+  } catch (error) {
+    setSavedRecordId(null);
+    setSaveMessage(getApiErrorMessage(error),);
+  } finally {
+    setIsSaving(false);
+  }
+}
+
   return (
     <>
       <section className="hero">
@@ -158,6 +209,11 @@ async function handleCurrentLocation(criteria) {
           </ul>
         </article>
       </section>
+
+      {weatherData && selectedLocation && (
+      <SaveWeatherPanel isSaving={isSaving} onSave={handleSaveWeather} savedRecordId={savedRecordId} saveMessage={saveMessage} />
+      )}
+
       <ForecastSection weatherData={weatherData} />
     </>
   );

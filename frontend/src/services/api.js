@@ -17,5 +17,13 @@ export async function getWeather({latitude,longitude,startDate,endDate,temperatu
     params: {latitude,longitude,start_date: startDate,end_date: endDate,temperature_unit: temperatureUnit,},});
   return response.data;
 }
+export async function createWeatherRecord(requestData) {
+  const response = await apiClient.post("/api/weather-records",requestData,);
+  return response.data;
+}
 
+export async function getWeatherRecords({skip = 0,limit = 50,}={}) {
+  const response = await apiClient.get("/api/weather-records",{params: {skip,limit,},},);
+  return response.data;
+}
 export default apiClient;
