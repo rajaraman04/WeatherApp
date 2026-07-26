@@ -160,3 +160,14 @@ The application follows a desktop-first responsive approach using:
 cd frontend
 npm install
 npm run dev
+
+## Frontend API Integration
+
+The React frontend communicates with FastAPI through Axios.
+
+### Frontend Environment
+
+Create `frontend/.env`:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000

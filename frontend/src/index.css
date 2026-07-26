@@ -554,3 +554,133 @@ h2 {
     border-radius: 14px;
   }
 }
+.error-alert {
+  margin: 1rem 0 1.5rem;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  background: #fef3f2;
+  color: #b42318;
+  line-height: 1.5;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.location-results {
+  margin-bottom: 1.5rem;
+  border: 1px solid #dfe6f1;
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.05);
+}
+
+.location-results__list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.location-result {
+  display: flex;
+  width: 100%;
+  min-height: 70px;
+  border: 1px solid #dfe6f1;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #ffffff;
+  color: #172033;
+  text-align: left;
+}
+
+.location-result:hover:not(:disabled) {
+  border-color: #175cd3;
+  background: #f5f9ff;
+}
+
+.location-result strong,
+.location-result__label {
+  display: block;
+}
+
+.location-result__label {
+  margin-top: 0.2rem;
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.location-result__coordinates {
+  flex-shrink: 0;
+  color: #667085;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.loading-message {
+  margin: 1rem 0 0;
+  color: #175cd3;
+  font-weight: 600;
+}
+
+.current-weather__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.current-weather__icon {
+  font-size: 3rem;
+}
+
+.current-weather__temperature {
+  margin: 1.5rem 0;
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 750;
+  line-height: 1;
+}
+
+.weather-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.weather-metric {
+  display: flex;
+  min-height: 76px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  padding: 0.8rem;
+  flex-direction: column;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.weather-metric span {
+  margin-bottom: 0.3rem;
+  color: #667085;
+  font-size: 0.78rem;
+}
+
+.weather-metric strong {
+  color: #172033;
+  font-size: 0.95rem;
+}
+@media (max-width: 680px) {
+  .location-result {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .location-result__coordinates {
+    flex-shrink: 1;
+  }
+  .weather-metrics {
+    grid-template-columns: 1fr;
+  }
+}

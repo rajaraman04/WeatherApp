@@ -1,34 +1,50 @@
 import { useState } from "react";
 
-function LocationSearchForm() {
-  const [location, setLocation]= useState("");
-  const [startDate, setStartDate]= useState("");
-  const [endDate, setEndDate]= useState("");
-  const [temperatureUnit, setTemperatureUnit]= useState("fahrenheit");
-  const [formMessage, setFormMessage]= useState("");
+import {getDefaultDateRange,getInclusiveDayCount,} from "../utils/date.js";
+
+const defaultDates = getDefaultDateRange();
+
+function LocationSearchForm({isSearching,onSearch,
+}) {
+  const [location, setLocation] = useState("");
+  const [startDate, setStartDate] = useState(defaultDates.startDate,);
+  const [endDate, setEndDate] = useState(defaultDates.endDate,);
+  const [temperatureUnit, setTemperatureUnit] =useState("fahrenheit");
+  const [validationMessage, setValidationMessage] =useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (!location.trim()) {
-      setFormMessage("Enter a city, town, landmark, or postal code.",);
+    const normalizedLocation = location.trim();
+    if (normalizedLocation.length < 2) {
+      setValidationMessage("Enter at least two characters for the location.",);
       return;
     }
-    if (!startDate || !endDate) {
-      setFormMessage("Select both start date and an end date.");
-      return;
-    }
-    setFormMessage("The form layout is working. FastAPI integration will be added soon.",);
-  }
 
-  function handleCurrentLocation() {
-    setFormMessage("Browser geolocation will be connected soon.",);
+    if (!startDate || !endDate) {
+      setValidationMessage("Select both the start date and an end date.",);
+      return;
+    }
+
+    if (endDate < startDate) {
+      setValidationMessage( "The end date must be the same as or later than the start date.",);
+      return;
+    }
+    const numberOfDays = getInclusiveDayCount(startDate,endDate,);
+    if (numberOfDays > 5) {
+      setValidationMessage("The selected date range cannot exceed five days.",);
+      return;
+    }
+    setValidationMessage("");
+
+    onSearch({location: normalizedLocation,startDate,endDate,temperatureUnit,});
   }
 
   return (
     <section className="search-panel" aria-labelledby="weather-search-title">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Weather search</p>
+          <p className="eyebrow">Weather Search</p>
+
           <h2 id="weather-search-title">
             Check weather for your desired location
           </h2>
@@ -43,21 +59,22 @@ function LocationSearchForm() {
         <div className="form-field form-field--location">
           <label htmlFor="location">Location</label>
 
-          <input id="location" name="location" onChange={(event) => setLocation(event.target.value)} placeholder="City, town, landmark, or postal code" type="text"
-            value={location}/>
+          <input autoComplete="off" id="location" name="location" onChange={(event) =>setLocation(event.target.value)}
+            placeholder="City, town, landmark, or postal code" type="text" value={location}/>
         </div>
 
         <div className="form-field">
           <label htmlFor="start-date">Start date</label>
 
-          <input id="start-date" name="startDate" onChange={(event) => setStartDate(event.target.value)} required
-            type="date" value={startDate}/>
+          <input id="start-date" min={defaultDates.startDate} name="startDate" onChange={(event) => setStartDate(event.target.value)}
+            type="date" value={startDate} />
         </div>
 
         <div className="form-field">
           <label htmlFor="end-date">End date</label>
 
-          <input id="end-date" name="endDate" onChange={(event) => setEndDate(event.target.value)} required type="date" value={endDate} />
+          <input id="end-date" min={startDate} name="endDate" onChange={(event) => setEndDate(event.target.value)}
+            type="date" value={endDate} />
         </div>
 
         <div className="form-field">
@@ -65,29 +82,35 @@ function LocationSearchForm() {
             Temperature unit
           </label>
 
-          <select id="temperature-unit" name="temperatureUnit"onChange={(event) => setTemperatureUnit(event.target.value) } value={temperatureUnit} >
-            <option value="fahrenheit">Fahrenheit (°F)</option>
-            <option value="celsius">Celsius (°C)</option>
+          <select id="temperature-unit" name="temperatureUnit" onChange={(event) => setTemperatureUnit(event.target.value) } value={temperatureUnit}>
+            <option value="fahrenheit">
+              Fahrenheit (°F)
+            </option>
+
+            <option value="celsius">
+              Celsius (°C)
+            </option>
           </select>
         </div>
 
         <div className="weather-form__actions">
-          <button className="button button--primary" type="submit">
-            Search Weather
+          <button className="button button--primary" disabled={isSearching} type="submit">
+            {isSearching
+              ? "Searching Locations..."
+              : "Search Weather"}
           </button>
 
-          <button className="button button--secondary" onClick={handleCurrentLocation} type="button">
+          <button className="button button--secondary" disabled title="Current-location support will be added in Step 15." type="button">
             Use Current Location
           </button>
         </div>
       </form>
 
-      {formMessage && ( <p className="form-message" role="status">
-          {formMessage}
+      {validationMessage && ( <p className="error-alert" role="alert">
+          {validationMessage}
         </p>
       )}
     </section>
   );
 }
-
 export default LocationSearchForm;
