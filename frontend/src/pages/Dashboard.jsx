@@ -147,7 +147,8 @@ async function handleSaveWeather() {
           </p>
 
           <h1>
-            Plan confidently with weather that matters.
+            Real-Time Weather, 
+            Real-Time Decisions.
           </h1>
 
           <p className="hero__description">

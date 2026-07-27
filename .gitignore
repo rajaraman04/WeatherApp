@@ -1,19 +1,30 @@
-**pycache**/
+__pycache__/
 *.py[cod]
 *.pyo
 tech/
+backend/tech
 .venv/
 venv/
+env/
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
 
 .env
+.env.*
+!.env.example
 backend/.env
 frontend/.env
 
 node_modules/
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 
 .vscode/
 .idea/
@@ -22,6 +33,9 @@ frontend/dist/
 Thumbs.db
 
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 *.tmp
 *.temp
