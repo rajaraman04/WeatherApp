@@ -34,7 +34,7 @@ async def lifespan(app):
 
 app = FastAPI(title="Weather App",description=("A Weather app API for weather retrieval, CRUD operations, and data export."),version="1.0.0",lifespan=lifespan,)
 
-app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origin_list,allow_credentials=False,allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],allow_headers=["Accept","Content-Type", "Authorization"],expose_headers=["Content-Disposition"])
+app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_credentials=False,allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],allow_headers=["Accept","Content-Type", "Authorization"],expose_headers=["Content-Disposition"])
 app.include_router(locations_router)
 app.include_router(weather_router)
 app.include_router(weather_records_router)
