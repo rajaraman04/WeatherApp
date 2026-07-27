@@ -13,10 +13,9 @@ from app.routes.weather import router as weather_router
 from app.routes.weather_records import router as weather_records_router
 
 logger = logging.getLogger(__name__)
-
+settings=get_settings()
 @asynccontextmanager
 async def lifespan(app):
-    settings= get_settings()
     mongodb_client= create_mongodb_client(settings)
     try:
         await verify_mongodb_connection(mongodb_client)
@@ -35,9 +34,7 @@ async def lifespan(app):
 
 app = FastAPI(title="Weather App",description=("A Weather app API for weather retrieval, CRUD operations, and data export."),version="1.0.0",lifespan=lifespan,)
 
-allowed_origins = ["http://localhost:5173","http://127.0.0.1:5173",]
-
-app.add_middleware(CORSMiddleware,allow_origins=allowed_origins,allow_credentials=False,allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],allow_headers=["Accept","Content-Type", "Authorization"],expose_headers=["Content-Disposition"])
+app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origin_list,allow_credentials=False,allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],allow_headers=["Accept","Content-Type", "Authorization"],expose_headers=["Content-Disposition"])
 app.include_router(locations_router)
 app.include_router(weather_router)
 app.include_router(weather_records_router)

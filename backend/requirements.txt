@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 pymongo
+pydantic
 pydantic-settings
 httpx
 python-dotenv
