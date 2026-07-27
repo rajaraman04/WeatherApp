@@ -1,12 +1,18 @@
 from datetime import date, datetime, timedelta
 from typing import Literal, Self
 from pydantic import BaseModel, Field,ConfigDict,model_validator
+from zoneinfo import ZoneInfo
+from app.config import get_settings
 
 TemperatureUnit = Literal["celsius","fahrenheit"]
 WindSpeedUnit = Literal["kmh", "mph"]
 PrecipitationUnit = Literal["mm", "inch"]
 WeatherSource = Literal["forecast", "historical"]
 ExportFormat = Literal["json", "csv"]
+
+def get_application_today():
+    settings = get_settings()
+    return datetime.now(ZoneInfo(settings.app_timezone)).date()
 
 class WeatherRecordCreate(BaseModel):
     location:str | None = Field(default=None,min_length=2,max_length=120,examples=["Binghamton, NY"],)
@@ -36,7 +42,7 @@ class WeatherRecordCreate(BaseModel):
         number_of_days = (self.end_date - self.start_date).days + 1
         if number_of_days > 5:
             raise ValueError("The selected date range cannot exceed five days.")
-        today = date.today()
+        today = get_application_today()
         if self.start_date < today:
             raise ValueError("Start date cannot be in the past.")
         latest_supported_date = today + timedelta(days=15)
@@ -156,7 +162,7 @@ class WeatherQuery(BaseModel):
         selected_days=(self.end_date-self.start_date).days + 1
         if selected_days > 5:
             raise ValueError("The selected date range cannot exceed 5 days.")
-        today = date.today()
+        today = get_application_today()
         if self.start_date < today:
             raise ValueError("Start date cannot be in past.")
         latest_supported_date = today + timedelta(days=15)

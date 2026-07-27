@@ -1,10 +1,10 @@
 from datetime import date,timedelta
 import pytest
 from pydantic import ValidationError
-from app.schemas import WeatherRecordCreate,WeatherRecordUpdate
+from app.schemas import WeatherRecordCreate,WeatherRecordUpdate,get_application_today
 
 def test_create_schema_accepts_location():
-    today = date.today()
+    today = get_application_today()
     end_date = today + timedelta(days=4)
     record = WeatherRecordCreate(location="Binghamton, NY",start_date=today,end_date=end_date,temperature_unit="fahrenheit",)
     assert record.location == "Binghamton, NY"
@@ -13,7 +13,7 @@ def test_create_schema_accepts_location():
     assert record.temperature_unit == "fahrenheit"
 
 def test_create_schema_accepts_coordinates():
-    today=date.today()
+    today=get_application_today()
     end_date=today + timedelta(days=4)
     record=WeatherRecordCreate(latitude=42.0987,longitude=-75.9180,start_date=today,end_date=end_date,)
     assert record.latitude==42.0987
